@@ -32,10 +32,14 @@ else:
 output_dir = os.path.join(base_dir, 'downloads')
 # Quando empacotado em --onefile, dados adicionados com --add-data
 # são extraídos em sys._MEIPASS. Use-o se existir para localizar o ffmpeg.
+# Resolve local ffmpeg directory (when bundled) or fallback to system ffmpeg in PATH
 if hasattr(sys, '_MEIPASS'):
     ffmpeg_dir = os.path.join(sys._MEIPASS, 'intalacao', 'ffmpeg', 'bin')
 else:
     ffmpeg_dir = os.path.join(base_dir, 'intalacao', 'ffmpeg', 'bin')
+
+# Detect ffmpeg availability; only set ffmpeg_location if the directory exists.
+_ffmpeg_dir_exists = os.path.isdir(ffmpeg_dir)
 os.makedirs(output_dir, exist_ok=True)
 
 # Estado de progresso por job
@@ -52,7 +56,8 @@ ydl_opts_base = {
 	'quiet': True,
 	'no_warnings': True,
 	'noprogress': True,
-	'ffmpeg_location': ffmpeg_dir,
+	# Only point to bundled ffmpeg if directory exists; otherwise rely on PATH
+	'ffmpeg_location': ffmpeg_dir if _ffmpeg_dir_exists else None,
 	'prefer_ffmpeg': True,
     # Permite desativar verificação de certificado via variável de ambiente (em último caso)
     'nocheckcertificate': os.environ.get('DISABLE_CERT_VERIFY', '0') in ('1', 'true', 'True'),
@@ -254,6 +259,18 @@ def start():
 @app.route('/status/<job_id>', methods=['GET'])
 def status_page(job_id):
 	return render_template_string(HTML_STATUS, job_id=job_id)
+
+
+@app.route('/healthz', methods=['GET'])
+def healthz():
+    # Basic readiness/liveness check
+    try:
+        return jsonify({
+            'status': 'ok',
+            'time': int(time.time()),
+        })
+    except Exception:
+        return jsonify({'status': 'error'}), 500
 
 
 @app.route('/progress/<job_id>', methods=['GET'])

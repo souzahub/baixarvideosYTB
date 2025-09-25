@@ -25,8 +25,8 @@ ENV FLASK_ENV=production \
     HOST=0.0.0.0 \
     PORT=5000
 
-# Healthcheck simples
-HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 CMD curl -fsS http://127.0.0.1:${PORT}/ || exit 1
+# Healthcheck simples (usa /healthz)
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 CMD curl -fsS http://127.0.0.1:${PORT}/healthz || exit 1
 
-# Comando de inicialização
-CMD ["python", "downloader.py"]
+# Comando de inicialização (Gunicorn para produção)
+CMD ["gunicorn", "downloader:app", "--bind", "0.0.0.0:${PORT}", "--workers", "2", "--threads", "4", "--timeout", "120"]

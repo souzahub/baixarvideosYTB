@@ -1,0 +1,40 @@
+### Passo a passo (Windows VPS) — usando EXE
+
+1) Gerar o EXE (no seu PC)
+- Abra o PowerShell na pasta `C:\BaixaYoutube` e rode:
+  ```powershell
+  .\build_exe.bat
+  ```
+- Resultado: `C:\BaixaYoutube\dist\BaixaYoutube.exe`
+
+2) Enviar para o servidor
+- Copie a pasta inteira `dist` para o Windows Server (ex.: via RDP, WinSCP, OneDrive). Mantenha a estrutura.
+
+3) Iniciar o servidor no Windows Server
+- Abra o PowerShell dentro da pasta `dist` copiada e rode:
+  ```powershell
+  ..\run_server.bat
+  ```
+  Observações:
+  - Esse script abre a porta TCP 5000 no firewall (regra `BaixaYoutube_HTTP_5000`).
+  - O app sobe em `0.0.0.0:5000` (acesso pela rede).
+
+4) Acessar pela rede
+- De outra máquina, acesse:
+  - `http://SEU_IP_PUBLICO:5000/`
+
+5) Iniciar automaticamente no login do servidor (opcional)
+- Ainda no servidor, rode uma vez:
+  ```powershell
+  ..\install_service.bat
+  ```
+- Para remover depois:
+  ```powershell
+  ..\uninstall_service.bat
+  ```
+
+6) Onde ficam os arquivos baixados
+- Dentro da mesma pasta ao lado do EXE: `downloads`.
+
+7) Trocar porta (opcional)
+- Edite a variável `PORT` em `run_server.bat`, `install_service.bat` e `uninstall_service.bat` (se desejar outra porta).

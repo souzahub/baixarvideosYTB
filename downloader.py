@@ -44,6 +44,16 @@ os.makedirs(output_dir, exist_ok=True)
 
 # URL pública opcional (para quando estiver atrás de proxy/domínio). Ex.: https://meu-dominio
 base_url_env = (os.environ.get('BASE_URL') or '').strip()
+if not base_url_env:
+    # Se não definiu BASE_URL, tenta montar com PUBLIC_PORT
+    public_port = os.environ.get('PUBLIC_PORT')
+    if public_port:
+        host = os.environ.get('HOST', '0.0.0.0')
+        if host in ('0.0.0.0', '127.0.0.1', 'localhost'):
+            # Para acesso externo, use o IP do container ou domínio
+            base_url_env = f"http://69.30.204.84:{public_port}"
+        else:
+            base_url_env = f"http://{host}:{public_port}"
 BASE_URL = base_url_env[:-1] if base_url_env.endswith('/') else base_url_env
 
 # Estado de progresso por job

@@ -42,6 +42,10 @@ else:
 _ffmpeg_dir_exists = os.path.isdir(ffmpeg_dir)
 os.makedirs(output_dir, exist_ok=True)
 
+# URL pública opcional (para quando estiver atrás de proxy/domínio). Ex.: https://meu-dominio
+base_url_env = (os.environ.get('BASE_URL') or '').strip()
+BASE_URL = base_url_env[:-1] if base_url_env.endswith('/') else base_url_env
+
 # Estado de progresso por job
 job_lock = threading.Lock()
 job_state = {}
@@ -135,12 +139,13 @@ HTML_STATUS = """
       .btn { display: inline-block; margin-top: 16px; padding: 10px 14px; background: #1f2937; border-radius: 8px; color: #e5e7eb; text-decoration: none; }
     </style>
     <script>
+      const baseUrl = {{ '"' + (base_url or '') + '"' }};
       const jobId = '{{ job_id }}';
       let finished = false;
       async function poll(){
         if(finished) return;
         try{
-          const res = await fetch('/progress/' + jobId + '?_=' + Date.now());
+          const res = await fetch((baseUrl || '') + '/progress/' + jobId + '?_=' + Date.now());
           const data = await res.json();
           const pct = Math.max(0, Math.min(100, Math.floor((data.percent || 0))));
           document.getElementById('fill').style.width = pct + '%';
@@ -151,7 +156,8 @@ HTML_STATUS = """
           if(data.status === 'finished'){
             finished = true;
             document.getElementById('done').style.display = 'block';
-            document.getElementById('link').href = '/file/' + encodeURIComponent(jobId);
+            const href = (baseUrl || '') + '/file/' + encodeURIComponent(jobId);
+            document.getElementById('link').href = href;
             document.getElementById('fname').textContent = data.filename;
           } else if(data.status === 'error'){
             finished = true;
@@ -258,7 +264,7 @@ def start():
 
 @app.route('/status/<job_id>', methods=['GET'])
 def status_page(job_id):
-	return render_template_string(HTML_STATUS, job_id=job_id)
+    return render_template_string(HTML_STATUS, job_id=job_id, base_url=BASE_URL)
 
 
 @app.route('/healthz', methods=['GET'])

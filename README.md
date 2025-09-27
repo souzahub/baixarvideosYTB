@@ -13,7 +13,7 @@ Downloads são temporários (apagados após o envio ao cliente).
 - `HOST` (default `0.0.0.0`)
 - `PORT` (default `5000`)
 - `BASE_URL` (opcional). Ex.: `https://uadezap-baixarvideoytb.xv2gsb.easypanel.host` ou `http://SEU_IP:5000`.
-- `PUBLIC_PORT` (opcional). Se definido, monta automaticamente BASE_URL com `http://69.30.204.84:PORT`. Ex.: `8080`
+- `PUBLIC_PORT` (opcional). Se definido, monta automaticamente BASE_URL com `http://123.123.123.111:PORT`. Ex.: `8080`
 - `DISABLE_CERT_VERIFY` = `1` para desativar verificação SSL (último recurso)
 - `PROXY_URL` = `http://user:pass@proxy:3128` (ou `https://...`) se sua rede exigir proxy
 
